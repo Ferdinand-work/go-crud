@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"example.com/go-crud/controllers"
-	"example.com/go-crud/services"
+	"github.com/Ferdinand-work/go-crud/controllers"
+	"github.com/Ferdinand-work/go-crud/services"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"

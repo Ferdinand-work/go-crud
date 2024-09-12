@@ -3,8 +3,8 @@ package controllers
 import (
 	"net/http"
 
-	"example.com/go-crud/models"
-	"example.com/go-crud/services"
+	"github.com/Ferdinand-work/go-crud/models"
+	"github.com/Ferdinand-work/go-crud/services"
 	"github.com/gin-gonic/gin"
 )
 

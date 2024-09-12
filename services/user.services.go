@@ -1,7 +1,7 @@
 package services
 
 import (
-	"example.com/go-crud/models"
+	"github.com/Ferdinand-work/go-crud/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
