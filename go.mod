@@ -1,4 +1,4 @@
-module example.com/go-crud
+module github.com/Ferdinand-work/go-crud
 
 go 1.22.5
 
