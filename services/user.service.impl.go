@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -117,10 +116,29 @@ func (u *UserServiceImpl) GetByAge(age int64) ([]*models.User, error) {
 	return users, nil
 }
 
-func (u *UserServiceImpl) AddFriends(usernames *[]string, name string) (*[]models.User, error) {
+func (u *UserServiceImpl) AddFriends(usernames *[]string, name string) (*[]string, error) {
 
-	filter := bson.M{"user_name": bson.M{"$in": usernames}}
-	fmt.Println(usernames)
+	filter := bson.D{bson.E{Key: "user_name", Value: name}}
+	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "friends", Value: usernames}}}}
+	result, err := u.userCollection.UpdateOne(u.ctx, filter, update)
+	if err != nil {
+		return nil, errors.New("cannot update")
+	}
+	if result.MatchedCount < 1 {
+		return nil, errors.New("no matched document found for update")
+	}
+	return usernames, nil
+}
+
+func (u *UserServiceImpl) GetFriends(name string) (*[]models.User, error) {
+	var user *models.User
+	query := bson.D{bson.E{Key: "user_name", Value: name}}
+	err := u.userCollection.FindOne(u.ctx, query).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	friendNames := user.Friends
+	filter := bson.M{"user_name": bson.M{"$in": &friendNames}}
 	cursor, err := u.userCollection.Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
@@ -128,18 +146,9 @@ func (u *UserServiceImpl) AddFriends(usernames *[]string, name string) (*[]model
 	defer cursor.Close(context.Background())
 
 	var users []models.User
-	if err = cursor.All(context.Background(), &users); err != nil {
+	var pointer = &users
+	if err = cursor.All(context.Background(), pointer); err != nil {
 		return nil, err
 	}
-	fmt.Println(users)
-	filter2 := bson.D{bson.E{Key: "user_name", Value: name}}
-	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "friends", Value: users}}}}
-	result, err := u.userCollection.UpdateOne(u.ctx, filter2, update)
-	if err != nil {
-		return nil, errors.New("cannot update")
-	}
-	if result.MatchedCount < 1 {
-		return nil, errors.New("no matched document found for update")
-	}
-	return &users, nil
+	return pointer, nil
 }

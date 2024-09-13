@@ -104,6 +104,15 @@ func (uc *UserController) AddFriends(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, *resFriends)
 }
 
+func (uc *UserController) GetFriends(ctx *gin.Context) {
+	username := ctx.Param("name")
+	friendsList, err := uc.UserService.GetFriends(username)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	}
+	ctx.JSON(http.StatusOK, *friendsList)
+}
+
 func (uc *UserController) RegisterUserRoutes(rg *gin.RouterGroup) {
 	userRoute := rg.Group("/user")
 	userRoute.POST("/create", uc.CreateUser)
@@ -113,5 +122,6 @@ func (uc *UserController) RegisterUserRoutes(rg *gin.RouterGroup) {
 	userRoute.DELETE("/delete/:name", uc.DeleteUser)
 	userRoute.GET("/getByAge/:age", uc.GetByAge)
 	userRoute.POST("/addFriends/:name", uc.AddFriends)
+	userRoute.GET("/getFriends/:name", uc.GetFriends)
 
 }
