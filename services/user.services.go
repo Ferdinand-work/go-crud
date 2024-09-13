@@ -11,4 +11,6 @@ type UserService interface {
 	GetAll() ([]*models.User, error)
 	UpdateUser(*models.User) error
 	DeleteUser(*string) error
+	GetByAge(int64) ([]*models.User, error)
+	AddFriends(*[]string, string) (*[]models.User, error)
 }
