@@ -97,7 +97,14 @@ func (uc *UserController) AddFriends(ctx *gin.Context) {
 		return
 	}
 
-	resFriends, err := uc.UserService.AddFriends(&friends.Friends, username)
+	var friendsToAdd interface{}
+	if friends.Friend != "" {
+		friendsToAdd = friends.Friend
+	} else {
+		friendsToAdd = friends.Friends
+	}
+
+	resFriends, err := uc.UserService.AddFriends(friendsToAdd, username)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
 	}

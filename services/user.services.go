@@ -12,6 +12,6 @@ type UserService interface {
 	UpdateUser(*models.User) error
 	DeleteUser(*string) error
 	GetByAge(int64) ([]*models.User, error)
-	AddFriends(*[]string, string) (*[]string, error)
+	AddFriends(interface{}, string) (*[]string, error)
 	GetFriends(string) (*[]models.User, error)
 }

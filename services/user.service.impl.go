@@ -9,6 +9,7 @@ import (
 
 	"github.com/Ferdinand-work/go-crud/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -116,10 +117,25 @@ func (u *UserServiceImpl) GetByAge(age int64) ([]*models.User, error) {
 	return users, nil
 }
 
-func (u *UserServiceImpl) AddFriends(usernames *[]string, name string) (*[]string, error) {
+func (u *UserServiceImpl) AddFriends(usernames interface{}, name string) (*[]string, error) {
 
 	filter := bson.D{bson.E{Key: "user_name", Value: name}}
-	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "friends", Value: usernames}}}}
+	var update primitive.D
+	switch v := usernames.(type) {
+	case string:
+		update = bson.D{bson.E{Key: "$push",
+			Value: bson.D{bson.E{Key: "friends",
+				Value: v}}}}
+	case []string:
+		update = bson.D{bson.E{Key: "$push",
+			Value: bson.D{bson.E{Key: "friends",
+				Value: bson.D{bson.E{Key: "$each",
+					Value: v},
+				}}}}}
+	default:
+		return nil, errors.New("invalid input type")
+	}
+
 	result, err := u.userCollection.UpdateOne(u.ctx, filter, update)
 	if err != nil {
 		return nil, errors.New("cannot update")
@@ -127,7 +143,17 @@ func (u *UserServiceImpl) AddFriends(usernames *[]string, name string) (*[]strin
 	if result.MatchedCount < 1 {
 		return nil, errors.New("no matched document found for update")
 	}
-	return usernames, nil
+	var friends []string
+	switch v := usernames.(type) {
+	case string:
+		friends = append(friends, v)
+	case []string:
+		friends = v
+	default:
+		return nil, errors.New("invalid input type")
+	}
+
+	return &friends, nil
 }
 
 func (u *UserServiceImpl) GetFriends(name string) (*[]models.User, error) {
